@@ -68,6 +68,35 @@ footer {
   color: #64748b;
 }
 
+/* Attendance Summary Cards */
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.summary-item {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-item h3 {
+  color: #475569;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.summary-item p {
+  color: #1d4ed8;
+  font-size: 30px;
+  font-weight: bold;
+}
+
 @media (max-width: 600px) {
   header h1 {
     font-size: 23px;
@@ -80,5 +109,9 @@ footer {
 
   .card {
     padding: 20px;
+  }
+
+  .attendance-summary {
+    grid-template-columns: 1fr;
   }
 }
