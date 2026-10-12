@@ -21,18 +21,15 @@
 
     <section class="card">
       <h2>Attendance Overview</h2>
-
       <div class="attendance-summary">
         <div class="summary-item">
           <h3>Total Students</h3>
           <p>120</p>
         </div>
-
         <div class="summary-item">
           <h3>Present Today</h3>
           <p>108</p>
         </div>
-
         <div class="summary-item">
           <h3>Absent Today</h3>
           <p>12</p>
@@ -42,10 +39,20 @@
 
     <section class="card">
       <h2>Attendance Records</h2>
-      <p>Student attendance overview</p>
+      <p>Search students by roll number or name.</p>
+
+      <div class="search-container">
+        <label for="studentSearch">Search Students</label>
+        <input
+          type="search"
+          id="studentSearch"
+          placeholder="Enter student name or roll number..."
+          autocomplete="off"
+        >
+      </div>
 
       <div class="table-container">
-        <table>
+        <table id="attendanceTable">
           <thead>
             <tr>
               <th>Roll No.</th>
@@ -53,7 +60,6 @@
               <th>Status</th>
             </tr>
           </thead>
-
           <tbody>
             <tr>
               <td>101</td>
@@ -77,6 +83,7 @@
             </tr>
           </tbody>
         </table>
+        <p id="noResults" hidden>No matching students found.</p>
       </div>
     </section>
 
@@ -94,6 +101,30 @@
   <footer>
     <p>TQM Project by Harshit Joshi</p>
   </footer>
+
+  <script>
+    const searchInput = document.getElementById("studentSearch");
+    const tableRows = document.querySelectorAll(
+      "#attendanceTable tbody tr"
+    );
+    const noResults = document.getElementById("noResults");
+
+    searchInput.addEventListener("input", function () {
+      const query = this.value.trim().toLowerCase();
+      let visibleRows = 0;
+
+      tableRows.forEach(function (row) {
+        const matches = row.textContent.toLowerCase().includes(query);
+        row.hidden = !matches;
+
+        if (matches) {
+          visibleRows++;
+        }
+      });
+
+      noResults.hidden = visibleRows !== 0;
+    });
+  </script>
 
 </body>
 </html>
