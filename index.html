@@ -64,7 +64,6 @@
                             <th>Attendance Percentage</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         <tr>
                             <td>101</td>
@@ -122,11 +121,16 @@
             const present = Number(cell.dataset.present);
             const total = Number(cell.dataset.total);
 
-            const percentage = total > 0
-                ? (present / total) * 100
-                : 0;
+            const percentage = total > 0 ? (present / total) * 100 : 0;
 
             cell.textContent = percentage.toFixed(1) + "%";
+
+            if (percentage < 75) {
+                cell.classList.add("low-attendance");
+                cell.title = "Attendance is below 75%";
+            } else {
+                cell.title = "Attendance meets the 75% threshold";
+            }
         });
 
         function filterStudents() {
