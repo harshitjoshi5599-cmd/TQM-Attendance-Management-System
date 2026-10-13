@@ -22,12 +22,10 @@
                     <h3>Total Students</h3>
                     <p>120</p>
                 </div>
-
                 <div class="summary-card">
                     <h3>Present</h3>
                     <p>108</p>
                 </div>
-
                 <div class="summary-card">
                     <h3>Absent</h3>
                     <p>12</p>
@@ -63,6 +61,7 @@
                             <th>Roll Number</th>
                             <th>Student Name</th>
                             <th>Status</th>
+                            <th>Attendance Percentage</th>
                         </tr>
                     </thead>
 
@@ -71,21 +70,25 @@
                             <td>101</td>
                             <td>Aarav Sharma</td>
                             <td class="status present">Present</td>
+                            <td class="percentage" data-present="45" data-total="50"></td>
                         </tr>
                         <tr>
                             <td>102</td>
                             <td>Priya Singh</td>
                             <td class="status absent">Absent</td>
+                            <td class="percentage" data-present="38" data-total="50"></td>
                         </tr>
                         <tr>
                             <td>103</td>
                             <td>Rahul Verma</td>
                             <td class="status present">Present</td>
+                            <td class="percentage" data-present="48" data-total="50"></td>
                         </tr>
                         <tr>
                             <td>104</td>
                             <td>Neha Joshi</td>
                             <td class="status present">Present</td>
+                            <td class="percentage" data-present="42" data-total="50"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -115,6 +118,17 @@
         const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
         const noResults = document.getElementById("noResults");
 
+        document.querySelectorAll(".percentage").forEach(function(cell) {
+            const present = Number(cell.dataset.present);
+            const total = Number(cell.dataset.total);
+
+            const percentage = total > 0
+                ? (present / total) * 100
+                : 0;
+
+            cell.textContent = percentage.toFixed(1) + "%";
+        });
+
         function filterStudents() {
             const searchTerm = studentSearch.value.trim().toLowerCase();
             const selectedStatus = attendanceFilter.value;
@@ -133,7 +147,6 @@
                     selectedStatus === "all" || status === selectedStatus;
 
                 const isVisible = matchesSearch && matchesStatus;
-
                 row.hidden = !isVisible;
 
                 if (isVisible) {
