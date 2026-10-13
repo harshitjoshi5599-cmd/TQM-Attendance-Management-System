@@ -1,130 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TQM Attendance Management System</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management System</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>Attendance Management System</h1>
-    <p>TQM Project | Harshit Joshi</p>
-  </header>
+    <header>
+        <h1>Attendance Management System</h1>
+        <p>TQM Project | Harshit Joshi</p>
+    </header>
 
-  <main>
-    <section class="card">
-      <h2>Welcome to the Dashboard</h2>
-      <p>Manage attendance records in one place.</p>
-    </section>
+    <main>
+        <section class="card">
+            <h2>Attendance Overview</h2>
 
-    <section class="card">
-      <h2>Attendance Overview</h2>
-      <div class="attendance-summary">
-        <div class="summary-item">
-          <h3>Total Students</h3>
-          <p>120</p>
-        </div>
-        <div class="summary-item">
-          <h3>Present Today</h3>
-          <p>108</p>
-        </div>
-        <div class="summary-item">
-          <h3>Absent Today</h3>
-          <p>12</p>
-        </div>
-      </div>
-    </section>
+            <div class="attendance-summary">
+                <div class="summary-card">
+                    <h3>Total Students</h3>
+                    <p>120</p>
+                </div>
 
-    <section class="card">
-      <h2>Attendance Records</h2>
-      <p>Search students by roll number or name.</p>
+                <div class="summary-card">
+                    <h3>Present</h3>
+                    <p>108</p>
+                </div>
 
-      <div class="search-container">
-        <label for="studentSearch">Search Students</label>
-        <input
-          type="search"
-          id="studentSearch"
-          placeholder="Enter student name or roll number..."
-          autocomplete="off"
-        >
-      </div>
+                <div class="summary-card">
+                    <h3>Absent</h3>
+                    <p>12</p>
+                </div>
+            </div>
+        </section>
 
-      <div class="table-container">
-        <table id="attendanceTable">
-          <thead>
-            <tr>
-              <th>Roll No.</th>
-              <th>Student Name</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>101</td>
-              <td>Aarav Sharma</td>
-              <td><span class="status present">Present</span></td>
-            </tr>
-            <tr>
-              <td>102</td>
-              <td>Priya Singh</td>
-              <td><span class="status absent">Absent</span></td>
-            </tr>
-            <tr>
-              <td>103</td>
-              <td>Rahul Verma</td>
-              <td><span class="status present">Present</span></td>
-            </tr>
-            <tr>
-              <td>104</td>
-              <td>Neha Joshi</td>
-              <td><span class="status present">Present</span></td>
-            </tr>
-          </tbody>
-        </table>
-        <p id="noResults" hidden>No matching students found.</p>
-      </div>
-    </section>
+        <section class="card">
+            <h2>Attendance Records</h2>
 
-    <section class="card">
-      <h2>Project Objectives</h2>
-      <ul>
-        <li>Improve user satisfaction</li>
-        <li>Make attendance records easier to manage</li>
-        <li>Provide a clear and simple interface</li>
-        <li>Improve accessibility and usability</li>
-      </ul>
-    </section>
-  </main>
+            <div class="search-container">
+                <label for="studentSearch">Search by name or roll number</label>
+                <input
+                    type="text"
+                    id="studentSearch"
+                    placeholder="Enter student name or roll number..."
+                >
+            </div>
 
-  <footer>
-    <p>TQM Project by Harshit Joshi</p>
-  </footer>
+            <div class="search-container">
+                <label for="attendanceFilter">Filter by attendance status</label>
+                <select id="attendanceFilter">
+                    <option value="all">All Students</option>
+                    <option value="present">Present Only</option>
+                    <option value="absent">Absent Only</option>
+                </select>
+            </div>
 
-  <script>
-    const searchInput = document.getElementById("studentSearch");
-    const tableRows = document.querySelectorAll(
-      "#attendanceTable tbody tr"
-    );
-    const noResults = document.getElementById("noResults");
+            <div class="table-container">
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
 
-    searchInput.addEventListener("input", function () {
-      const query = this.value.trim().toLowerCase();
-      let visibleRows = 0;
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>Aarav Sharma</td>
+                            <td class="status present">Present</td>
+                        </tr>
+                        <tr>
+                            <td>102</td>
+                            <td>Priya Singh</td>
+                            <td class="status absent">Absent</td>
+                        </tr>
+                        <tr>
+                            <td>103</td>
+                            <td>Rahul Verma</td>
+                            <td class="status present">Present</td>
+                        </tr>
+                        <tr>
+                            <td>104</td>
+                            <td>Neha Joshi</td>
+                            <td class="status present">Present</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-      tableRows.forEach(function (row) {
-        const matches = row.textContent.toLowerCase().includes(query);
-        row.hidden = !matches;
+            <p id="noResults" hidden>No matching students found.</p>
+        </section>
 
-        if (matches) {
-          visibleRows++;
+        <section class="card">
+            <h2>Project Objectives</h2>
+            <ul>
+                <li>Maintain student attendance records.</li>
+                <li>Make attendance information easy to access.</li>
+                <li>Improve the efficiency of attendance tracking.</li>
+                <li>Support quality improvement through better record management.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>Attendance Management System | TQM Project</p>
+    </footer>
+
+    <script>
+        const studentSearch = document.getElementById("studentSearch");
+        const attendanceFilter = document.getElementById("attendanceFilter");
+        const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
+        const noResults = document.getElementById("noResults");
+
+        function filterStudents() {
+            const searchTerm = studentSearch.value.trim().toLowerCase();
+            const selectedStatus = attendanceFilter.value;
+            let visibleCount = 0;
+
+            tableRows.forEach(function(row) {
+                const rollNumber = row.cells[0].textContent.toLowerCase();
+                const studentName = row.cells[1].textContent.toLowerCase();
+                const status = row.cells[2].textContent.trim().toLowerCase();
+
+                const matchesSearch =
+                    rollNumber.includes(searchTerm) ||
+                    studentName.includes(searchTerm);
+
+                const matchesStatus =
+                    selectedStatus === "all" || status === selectedStatus;
+
+                const isVisible = matchesSearch && matchesStatus;
+
+                row.hidden = !isVisible;
+
+                if (isVisible) {
+                    visibleCount++;
+                }
+            });
+
+            noResults.hidden = visibleCount > 0;
         }
-      });
 
-      noResults.hidden = visibleRows !== 0;
-    });
-  </script>
+        studentSearch.addEventListener("input", filterStudents);
+        attendanceFilter.addEventListener("change", filterStudents);
+    </script>
 
 </body>
 </html>
