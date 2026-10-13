@@ -20,15 +20,15 @@
             <div class="attendance-summary">
                 <div class="summary-card">
                     <h3>Total Students</h3>
-                    <p>120</p>
+                    <p id="totalStudents">0</p>
                 </div>
                 <div class="summary-card">
                     <h3>Present</h3>
-                    <p>108</p>
+                    <p id="presentStudents">0</p>
                 </div>
                 <div class="summary-card">
                     <h3>Absent</h3>
-                    <p>12</p>
+                    <p id="absentStudents">0</p>
                 </div>
             </div>
         </section>
@@ -38,11 +38,8 @@
 
             <div class="search-container">
                 <label for="studentSearch">Search by name or roll number</label>
-                <input
-                    type="text"
-                    id="studentSearch"
-                    placeholder="Enter student name or roll number..."
-                >
+                <input type="text" id="studentSearch"
+                    placeholder="Enter student name or roll number...">
             </div>
 
             <div class="search-container">
@@ -117,21 +114,47 @@
         const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
         const noResults = document.getElementById("noResults");
 
-        document.querySelectorAll(".percentage").forEach(function(cell) {
-            const present = Number(cell.dataset.present);
-            const total = Number(cell.dataset.total);
+        function updateAttendanceSummary() {
+            let total = 0;
+            let present = 0;
+            let absent = 0;
 
-            const percentage = total > 0 ? (present / total) * 100 : 0;
+            tableRows.forEach(function(row) {
+                total++;
 
-            cell.textContent = percentage.toFixed(1) + "%";
+                const status = row.cells[2].textContent.trim().toLowerCase();
 
-            if (percentage < 75) {
-                cell.classList.add("low-attendance");
-                cell.title = "Attendance is below 75%";
-            } else {
-                cell.title = "Attendance meets the 75% threshold";
-            }
-        });
+                if (status === "present") {
+                    present++;
+                } else if (status === "absent") {
+                    absent++;
+                }
+            });
+
+            document.getElementById("totalStudents").textContent = total;
+            document.getElementById("presentStudents").textContent = present;
+            document.getElementById("absentStudents").textContent = absent;
+        }
+
+        function calculatePercentages() {
+            document.querySelectorAll(".percentage").forEach(function(cell) {
+                const presentDays = Number(cell.dataset.present);
+                const totalDays = Number(cell.dataset.total);
+                const percentage = totalDays > 0
+                    ? (presentDays / totalDays) * 100
+                    : 0;
+
+                cell.textContent = percentage.toFixed(1) + "%";
+
+                if (percentage < 75) {
+                    cell.classList.add("low-attendance");
+                    cell.title = "Attendance is below 75%";
+                } else {
+                    cell.classList.remove("low-attendance");
+                    cell.title = "Attendance meets the 75% threshold";
+                }
+            });
+        }
 
         function filterStudents() {
             const searchTerm = studentSearch.value.trim().toLowerCase();
@@ -163,6 +186,9 @@
 
         studentSearch.addEventListener("input", filterStudents);
         attendanceFilter.addEventListener("change", filterStudents);
+
+        updateAttendanceSummary();
+        calculatePercentages();
     </script>
 
 </body>
