@@ -83,20 +83,21 @@ main {
     color: #263238;
 }
 
-.search-container input {
+.search-container input,
+.search-container select {
     display: block;
     width: 100%;
     padding: 12px 14px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 16px;
-    background: #fff;
+    background: white;
     color: #263238;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-container input:focus {
+.search-container input:focus,
+.search-container select:focus {
     border-color: #2878c7;
     box-shadow: 0 0 0 3px rgba(40, 120, 199, 0.15);
 }
@@ -138,6 +139,18 @@ tbody tr:hover {
 
 .status.absent {
     color: #d62828;
+}
+
+.percentage {
+    font-weight: bold;
+    color: #16803c;
+    white-space: nowrap;
+}
+
+.percentage.low-attendance {
+    color: #d62828;
+    background: #fff0f0;
+    border-radius: 6px;
 }
 
 #noResults {
