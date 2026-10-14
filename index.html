@@ -8,225 +8,262 @@
 </head>
 <body>
 
-    <header>
-        <h1>Attendance Management System</h1>
-        <p>TQM Project | Harshit Joshi</p>
-    </header>
+<header>
+    <h1>Attendance Management System</h1>
+    <p>TQM Project | Harshit Joshi</p>
+</header>
 
-    <main>
-        <section class="card">
-            <h2>Attendance Overview</h2>
-
-            <div class="attendance-summary">
-                <div class="summary-card">
-                    <h3>Total Students</h3>
-                    <p id="totalStudents">0</p>
-                </div>
-                <div class="summary-card">
-                    <h3>Present</h3>
-                    <p id="presentStudents">0</p>
-                </div>
-                <div class="summary-card">
-                    <h3>Absent</h3>
-                    <p id="absentStudents">0</p>
-                </div>
+<main>
+    <section class="card">
+        <h2>Attendance Overview</h2>
+        <div class="attendance-summary">
+            <div class="summary-card">
+                <h3>Total Students</h3>
+                <p id="totalStudents">0</p>
             </div>
-        </section>
-
-        <section class="card">
-            <h2>Attendance Records</h2>
-
-            <div class="search-container">
-                <label for="studentSearch">Search by name or roll number</label>
-                <input type="text" id="studentSearch"
-                    placeholder="Enter student name or roll number...">
+            <div class="summary-card">
+                <h3>Present</h3>
+                <p id="presentStudents">0</p>
             </div>
-
-            <div class="search-container">
-                <label for="attendanceFilter">Filter by attendance status</label>
-                <select id="attendanceFilter">
-                    <option value="all">All Students</option>
-                    <option value="present">Present Only</option>
-                    <option value="absent">Absent Only</option>
-                </select>
+            <div class="summary-card">
+                <h3>Absent</h3>
+                <p id="absentStudents">0</p>
             </div>
+        </div>
+    </section>
 
-            <div class="search-container">
-                <button type="button" id="downloadReport">
-                    Download Attendance Report (CSV)
-                </button>
-            </div>
+    <section class="card">
+        <h2>Attendance Records</h2>
 
-            <div class="table-container">
-                <table id="attendanceTable">
-                    <thead>
-                        <tr>
-                            <th>Roll Number</th>
-                            <th>Student Name</th>
-                            <th>Status</th>
-                            <th>Attendance Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>101</td>
-                            <td>Aarav Sharma</td>
-                            <td class="status present">Present</td>
-                            <td class="percentage" data-present="45" data-total="50"></td>
-                        </tr>
-                        <tr>
-                            <td>102</td>
-                            <td>Priya Singh</td>
-                            <td class="status absent">Absent</td>
-                            <td class="percentage" data-present="38" data-total="50"></td>
-                        </tr>
-                        <tr>
-                            <td>103</td>
-                            <td>Rahul Verma</td>
-                            <td class="status present">Present</td>
-                            <td class="percentage" data-present="48" data-total="50"></td>
-                        </tr>
-                        <tr>
-                            <td>104</td>
-                            <td>Neha Joshi</td>
-                            <td class="status present">Present</td>
-                            <td class="percentage" data-present="42" data-total="50"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="search-container">
+            <label for="studentSearch">Search by name or roll number</label>
+            <input type="text" id="studentSearch"
+                placeholder="Enter student name or roll number...">
+        </div>
 
-            <p id="noResults" hidden>No matching students found.</p>
-        </section>
+        <div class="search-container">
+            <label for="attendanceFilter">Filter by status</label>
+            <select id="attendanceFilter">
+                <option value="all">All Students</option>
+                <option value="present">Present Only</option>
+                <option value="absent">Absent Only</option>
+            </select>
+        </div>
 
-        <section class="card">
-            <h2>Project Objectives</h2>
-            <ul>
-                <li>Maintain student attendance records.</li>
-                <li>Make attendance information easy to access.</li>
-                <li>Improve the efficiency of attendance tracking.</li>
-                <li>Support quality improvement through better record management.</li>
-            </ul>
-        </section>
-    </main>
+        <div class="search-container">
+            <label for="sortRecords">Sort attendance records</label>
+            <select id="sortRecords">
+                <option value="roll">Roll Number: Low to High</option>
+                <option value="name">Name: A to Z</option>
+                <option value="percentageHigh">Attendance: High to Low</option>
+                <option value="percentageLow">Attendance: Low to High</option>
+            </select>
+        </div>
 
-    <footer>
-        <p>Attendance Management System | TQM Project</p>
-    </footer>
+        <div class="search-container">
+            <button type="button" id="downloadReport">
+                Download Attendance Report (CSV)
+            </button>
+        </div>
 
-    <script>
-        const studentSearch = document.getElementById("studentSearch");
-        const attendanceFilter = document.getElementById("attendanceFilter");
-        const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
-        const noResults = document.getElementById("noResults");
-        const downloadButton = document.getElementById("downloadReport");
+        <div class="table-container">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                        <th>Attendance Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>101</td>
+                        <td>Aarav Sharma</td>
+                        <td class="status present">Present</td>
+                        <td class="percentage" data-present="45" data-total="50"></td>
+                    </tr>
+                    <tr>
+                        <td>102</td>
+                        <td>Priya Singh</td>
+                        <td class="status absent">Absent</td>
+                        <td class="percentage" data-present="38" data-total="50"></td>
+                    </tr>
+                    <tr>
+                        <td>103</td>
+                        <td>Rahul Verma</td>
+                        <td class="status present">Present</td>
+                        <td class="percentage" data-present="48" data-total="50"></td>
+                    </tr>
+                    <tr>
+                        <td>104</td>
+                        <td>Neha Joshi</td>
+                        <td class="status present">Present</td>
+                        <td class="percentage" data-present="42" data-total="50"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        function updateAttendanceSummary() {
-            let total = 0;
-            let present = 0;
-            let absent = 0;
+        <p id="noResults" hidden>No matching students found.</p>
+    </section>
 
-            tableRows.forEach(function(row) {
-                total++;
-                const status = row.cells[2].textContent.trim().toLowerCase();
+    <section class="card">
+        <h2>Project Objectives</h2>
+        <ul>
+            <li>Maintain student attendance records.</li>
+            <li>Make attendance information easy to access.</li>
+            <li>Improve the efficiency of attendance tracking.</li>
+            <li>Support quality improvement through better record management.</li>
+        </ul>
+    </section>
+</main>
 
-                if (status === "present") present++;
-                if (status === "absent") absent++;
-            });
+<footer>
+    <p>Attendance Management System | TQM Project</p>
+</footer>
 
-            document.getElementById("totalStudents").textContent = total;
-            document.getElementById("presentStudents").textContent = present;
-            document.getElementById("absentStudents").textContent = absent;
-        }
+<script>
+    const studentSearch = document.getElementById("studentSearch");
+    const attendanceFilter = document.getElementById("attendanceFilter");
+    const sortRecords = document.getElementById("sortRecords");
+    const tableBody = document.querySelector("#attendanceTable tbody");
+    const noResults = document.getElementById("noResults");
+    const downloadButton = document.getElementById("downloadReport");
 
-        function calculatePercentages() {
-            document.querySelectorAll(".percentage").forEach(function(cell) {
-                const presentDays = Number(cell.dataset.present);
-                const totalDays = Number(cell.dataset.total);
-                const percentage = totalDays > 0
-                    ? (presentDays / totalDays) * 100
-                    : 0;
+    function getRows() {
+        return Array.from(tableBody.querySelectorAll("tr"));
+    }
 
-                cell.textContent = percentage.toFixed(1) + "%";
+    function updateAttendanceSummary() {
+        const rows = getRows();
+        let present = 0;
+        let absent = 0;
 
-                if (percentage < 75) {
-                    cell.classList.add("low-attendance");
-                    cell.title = "Attendance is below 75%";
-                } else {
-                    cell.classList.remove("low-attendance");
-                    cell.title = "Attendance meets the 75% threshold";
-                }
-            });
-        }
+        rows.forEach(function(row) {
+            const status = row.cells[2].textContent.trim().toLowerCase();
+            if (status === "present") present++;
+            if (status === "absent") absent++;
+        });
 
-        function filterStudents() {
-            const searchTerm = studentSearch.value.trim().toLowerCase();
-            const selectedStatus = attendanceFilter.value;
-            let visibleCount = 0;
+        document.getElementById("totalStudents").textContent = rows.length;
+        document.getElementById("presentStudents").textContent = present;
+        document.getElementById("absentStudents").textContent = absent;
+    }
 
-            tableRows.forEach(function(row) {
-                const rollNumber = row.cells[0].textContent.toLowerCase();
-                const studentName = row.cells[1].textContent.toLowerCase();
-                const status = row.cells[2].textContent.trim().toLowerCase();
+    function calculatePercentages() {
+        document.querySelectorAll(".percentage").forEach(function(cell) {
+            const present = Number(cell.dataset.present);
+            const total = Number(cell.dataset.total);
+            const percentage = total > 0 ? (present / total) * 100 : 0;
 
-                const matchesSearch =
-                    rollNumber.includes(searchTerm) ||
-                    studentName.includes(searchTerm);
+            cell.textContent = percentage.toFixed(1) + "%";
 
-                const matchesStatus =
-                    selectedStatus === "all" || status === selectedStatus;
+            if (percentage < 75) {
+                cell.classList.add("low-attendance");
+                cell.title = "Attendance is below 75%";
+            } else {
+                cell.classList.remove("low-attendance");
+                cell.title = "Attendance meets the 75% threshold";
+            }
+        });
+    }
 
-                const isVisible = matchesSearch && matchesStatus;
-                row.hidden = !isVisible;
+    function applySort() {
+        const rows = getRows();
+        const sortBy = sortRecords.value;
 
-                if (isVisible) visibleCount++;
-            });
+        rows.sort(function(a, b) {
+            if (sortBy === "roll") {
+                return Number(a.cells[0].textContent) -
+                    Number(b.cells[0].textContent);
+            }
 
-            noResults.hidden = visibleCount > 0;
-        }
+            if (sortBy === "name") {
+                return a.cells[1].textContent.localeCompare(
+                    b.cells[1].textContent
+                );
+            }
 
-        function downloadCSV() {
-            const csvRows = [
-                ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
-            ];
+            const percentA = parseFloat(a.cells[3].textContent) || 0;
+            const percentB = parseFloat(b.cells[3].textContent) || 0;
 
-            tableRows.forEach(function(row) {
-                const cells = Array.from(row.cells).map(function(cell) {
-                    return cell.textContent.trim();
-                });
+            if (sortBy === "percentageHigh") return percentB - percentA;
+            if (sortBy === "percentageLow") return percentA - percentB;
 
-                csvRows.push(cells);
-            });
+            return 0;
+        });
 
-            const csvContent = csvRows.map(function(row) {
-                return row.map(function(value) {
-                    return '"' + value.replace(/"/g, '""') + '"';
-                }).join(",");
-            }).join("\r\n");
+        rows.forEach(function(row) {
+            tableBody.appendChild(row);
+        });
 
-            const blob = new Blob(["\uFEFF" + csvContent], {
-                type: "text/csv;charset=utf-8;"
-            });
+        filterStudents();
+    }
 
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
+    function filterStudents() {
+        const searchTerm = studentSearch.value.trim().toLowerCase();
+        const selectedStatus = attendanceFilter.value;
+        let visibleCount = 0;
 
-            link.href = url;
-            link.download = "attendance-report.csv";
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+        getRows().forEach(function(row) {
+            const roll = row.cells[0].textContent.toLowerCase();
+            const name = row.cells[1].textContent.toLowerCase();
+            const status = row.cells[2].textContent.trim().toLowerCase();
 
-            URL.revokeObjectURL(url);
-        }
+            const matchesSearch =
+                roll.includes(searchTerm) || name.includes(searchTerm);
+            const matchesStatus =
+                selectedStatus === "all" || status === selectedStatus;
 
-        studentSearch.addEventListener("input", filterStudents);
-        attendanceFilter.addEventListener("change", filterStudents);
-        downloadButton.addEventListener("click", downloadCSV);
+            row.hidden = !(matchesSearch && matchesStatus);
 
-        updateAttendanceSummary();
-        calculatePercentages();
-    </script>
+            if (!row.hidden) visibleCount++;
+        });
+
+        noResults.hidden = visibleCount > 0;
+    }
+
+    function downloadCSV() {
+        const rows = [
+            ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
+        ];
+
+        getRows().forEach(function(row) {
+            rows.push(Array.from(row.cells).map(function(cell) {
+                return cell.textContent.trim();
+            }));
+        });
+
+        const csv = rows.map(function(row) {
+            return row.map(function(value) {
+                return '"' + value.replace(/"/g, '""') + '"';
+            }).join(",");
+        }).join("\r\n");
+
+        const blob = new Blob(["\uFEFF" + csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "attendance-report.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    studentSearch.addEventListener("input", filterStudents);
+    attendanceFilter.addEventListener("change", filterStudents);
+    sortRecords.addEventListener("change", applySort);
+    downloadButton.addEventListener("click", downloadCSV);
+
+    calculatePercentages();
+    updateAttendanceSummary();
+    filterStudents();
+</script>
 
 </body>
 </html>
