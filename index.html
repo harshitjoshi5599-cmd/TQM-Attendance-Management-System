@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Management System</title>
     <link rel="stylesheet" href="style.css">
-
     <style>
         .action-button {
             padding: 11px 18px;
+            margin: 4px 4px 4px 0;
             border: none;
             border-radius: 7px;
             background: #173b70;
@@ -22,28 +22,12 @@
         }
 
         @media print {
-            header {
-                background: white !important;
-                color: black !important;
-                padding: 10px;
+            .no-print, footer {
+                display: none !important;
             }
 
             body {
                 background: white;
-                color: black;
-            }
-
-            .no-print,
-            .search-container,
-            #noResults,
-            footer {
-                display: none !important;
-            }
-
-            main {
-                width: 100%;
-                max-width: none;
-                margin: 10px auto;
             }
 
             .card {
@@ -52,18 +36,9 @@
                 break-inside: avoid;
             }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
             th {
                 background: #eee !important;
                 color: black !important;
-            }
-
-            th, td {
-                border: 1px solid #999;
             }
 
             tr[hidden] {
@@ -94,6 +69,10 @@
             <div class="summary-card">
                 <h3>Absent</h3>
                 <p id="absentStudents">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Low Attendance (&lt;75%)</h3>
+                <p id="lowAttendanceCount">0</p>
             </div>
         </div>
     </section>
@@ -203,22 +182,6 @@
         return Array.from(tableBody.querySelectorAll("tr"));
     }
 
-    function updateAttendanceSummary() {
-        const rows = getRows();
-        let present = 0;
-        let absent = 0;
-
-        rows.forEach(function(row) {
-            const status = row.cells[2].textContent.trim().toLowerCase();
-            if (status === "present") present++;
-            if (status === "absent") absent++;
-        });
-
-        document.getElementById("totalStudents").textContent = rows.length;
-        document.getElementById("presentStudents").textContent = present;
-        document.getElementById("absentStudents").textContent = absent;
-    }
-
     function calculatePercentages() {
         document.querySelectorAll(".percentage").forEach(function(cell) {
             const present = Number(cell.dataset.present);
@@ -233,6 +196,27 @@
                 cell.classList.remove("low-attendance");
             }
         });
+    }
+
+    function updateAttendanceSummary() {
+        const rows = getRows();
+        let present = 0;
+        let absent = 0;
+        let lowAttendance = 0;
+
+        rows.forEach(function(row) {
+            const status = row.cells[2].textContent.trim().toLowerCase();
+            const percentage = parseFloat(row.cells[3].textContent) || 0;
+
+            if (status === "present") present++;
+            if (status === "absent") absent++;
+            if (percentage < 75) lowAttendance++;
+        });
+
+        document.getElementById("totalStudents").textContent = rows.length;
+        document.getElementById("presentStudents").textContent = present;
+        document.getElementById("absentStudents").textContent = absent;
+        document.getElementById("lowAttendanceCount").textContent = lowAttendance;
     }
 
     function filterStudents() {
@@ -321,6 +305,7 @@
     studentSearch.addEventListener("input", filterStudents);
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
+
     document.getElementById("downloadReport").addEventListener("click", downloadCSV);
     document.getElementById("printReport").addEventListener("click", function() {
         window.print();
