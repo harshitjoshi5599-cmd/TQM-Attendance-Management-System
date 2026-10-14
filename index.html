@@ -5,6 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Management System</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .action-button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 7px;
+            background: #173b70;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: #2878c7;
+        }
+
+        @media print {
+            header {
+                background: white !important;
+                color: black !important;
+                padding: 10px;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .no-print,
+            .search-container,
+            #noResults,
+            footer {
+                display: none !important;
+            }
+
+            main {
+                width: 100%;
+                max-width: none;
+                margin: 10px auto;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th {
+                background: #eee !important;
+                color: black !important;
+            }
+
+            th, td {
+                border: 1px solid #999;
+            }
+
+            tr[hidden] {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -35,13 +101,13 @@
     <section class="card">
         <h2>Attendance Records</h2>
 
-        <div class="search-container">
+        <div class="search-container no-print">
             <label for="studentSearch">Search by name or roll number</label>
             <input type="text" id="studentSearch"
                 placeholder="Enter student name or roll number...">
         </div>
 
-        <div class="search-container">
+        <div class="search-container no-print">
             <label for="attendanceFilter">Filter by status</label>
             <select id="attendanceFilter">
                 <option value="all">All Students</option>
@@ -50,8 +116,8 @@
             </select>
         </div>
 
-        <div class="search-container">
-            <label for="sortRecords">Sort attendance records</label>
+        <div class="search-container no-print">
+            <label for="sortRecords">Sort records</label>
             <select id="sortRecords">
                 <option value="roll">Roll Number: Low to High</option>
                 <option value="name">Name: A to Z</option>
@@ -60,9 +126,12 @@
             </select>
         </div>
 
-        <div class="search-container">
-            <button type="button" id="downloadReport">
-                Download Attendance Report (CSV)
+        <div class="search-container no-print">
+            <button type="button" class="action-button" id="downloadReport">
+                Download CSV Report
+            </button>
+            <button type="button" class="action-button" id="printReport">
+                Print / Save as PDF
             </button>
         </div>
 
@@ -129,7 +198,6 @@
     const sortRecords = document.getElementById("sortRecords");
     const tableBody = document.querySelector("#attendanceTable tbody");
     const noResults = document.getElementById("noResults");
-    const downloadButton = document.getElementById("downloadReport");
 
     function getRows() {
         return Array.from(tableBody.querySelectorAll("tr"));
@@ -161,44 +229,10 @@
 
             if (percentage < 75) {
                 cell.classList.add("low-attendance");
-                cell.title = "Attendance is below 75%";
             } else {
                 cell.classList.remove("low-attendance");
-                cell.title = "Attendance meets the 75% threshold";
             }
         });
-    }
-
-    function applySort() {
-        const rows = getRows();
-        const sortBy = sortRecords.value;
-
-        rows.sort(function(a, b) {
-            if (sortBy === "roll") {
-                return Number(a.cells[0].textContent) -
-                    Number(b.cells[0].textContent);
-            }
-
-            if (sortBy === "name") {
-                return a.cells[1].textContent.localeCompare(
-                    b.cells[1].textContent
-                );
-            }
-
-            const percentA = parseFloat(a.cells[3].textContent) || 0;
-            const percentB = parseFloat(b.cells[3].textContent) || 0;
-
-            if (sortBy === "percentageHigh") return percentB - percentA;
-            if (sortBy === "percentageLow") return percentA - percentB;
-
-            return 0;
-        });
-
-        rows.forEach(function(row) {
-            tableBody.appendChild(row);
-        });
-
-        filterStudents();
     }
 
     function filterStudents() {
@@ -217,25 +251,54 @@
                 selectedStatus === "all" || status === selectedStatus;
 
             row.hidden = !(matchesSearch && matchesStatus);
-
             if (!row.hidden) visibleCount++;
         });
 
         noResults.hidden = visibleCount > 0;
     }
 
+    function applySort() {
+        const rows = getRows();
+
+        rows.sort(function(a, b) {
+            const sortBy = sortRecords.value;
+
+            if (sortBy === "roll") {
+                return Number(a.cells[0].textContent) -
+                    Number(b.cells[0].textContent);
+            }
+
+            if (sortBy === "name") {
+                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
+            }
+
+            const aPercent = parseFloat(a.cells[3].textContent) || 0;
+            const bPercent = parseFloat(b.cells[3].textContent) || 0;
+
+            return sortBy === "percentageHigh"
+                ? bPercent - aPercent
+                : aPercent - bPercent;
+        });
+
+        rows.forEach(function(row) {
+            tableBody.appendChild(row);
+        });
+
+        filterStudents();
+    }
+
     function downloadCSV() {
-        const rows = [
+        const data = [
             ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
         ];
 
         getRows().forEach(function(row) {
-            rows.push(Array.from(row.cells).map(function(cell) {
+            data.push(Array.from(row.cells).map(function(cell) {
                 return cell.textContent.trim();
             }));
         });
 
-        const csv = rows.map(function(row) {
+        const csv = data.map(function(row) {
             return row.map(function(value) {
                 return '"' + value.replace(/"/g, '""') + '"';
             }).join(",");
@@ -258,7 +321,10 @@
     studentSearch.addEventListener("input", filterStudents);
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
-    downloadButton.addEventListener("click", downloadCSV);
+    document.getElementById("downloadReport").addEventListener("click", downloadCSV);
+    document.getElementById("printReport").addEventListener("click", function() {
+        window.print();
+    });
 
     calculatePercentages();
     updateAttendanceSummary();
