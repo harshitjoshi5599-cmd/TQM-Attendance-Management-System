@@ -51,6 +51,12 @@
                 </select>
             </div>
 
+            <div class="search-container">
+                <button type="button" id="downloadReport">
+                    Download Attendance Report (CSV)
+                </button>
+            </div>
+
             <div class="table-container">
                 <table id="attendanceTable">
                     <thead>
@@ -113,6 +119,7 @@
         const attendanceFilter = document.getElementById("attendanceFilter");
         const tableRows = document.querySelectorAll("#attendanceTable tbody tr");
         const noResults = document.getElementById("noResults");
+        const downloadButton = document.getElementById("downloadReport");
 
         function updateAttendanceSummary() {
             let total = 0;
@@ -121,14 +128,10 @@
 
             tableRows.forEach(function(row) {
                 total++;
-
                 const status = row.cells[2].textContent.trim().toLowerCase();
 
-                if (status === "present") {
-                    present++;
-                } else if (status === "absent") {
-                    absent++;
-                }
+                if (status === "present") present++;
+                if (status === "absent") absent++;
             });
 
             document.getElementById("totalStudents").textContent = total;
@@ -176,16 +179,50 @@
                 const isVisible = matchesSearch && matchesStatus;
                 row.hidden = !isVisible;
 
-                if (isVisible) {
-                    visibleCount++;
-                }
+                if (isVisible) visibleCount++;
             });
 
             noResults.hidden = visibleCount > 0;
         }
 
+        function downloadCSV() {
+            const csvRows = [
+                ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
+            ];
+
+            tableRows.forEach(function(row) {
+                const cells = Array.from(row.cells).map(function(cell) {
+                    return cell.textContent.trim();
+                });
+
+                csvRows.push(cells);
+            });
+
+            const csvContent = csvRows.map(function(row) {
+                return row.map(function(value) {
+                    return '"' + value.replace(/"/g, '""') + '"';
+                }).join(",");
+            }).join("\r\n");
+
+            const blob = new Blob(["\uFEFF" + csvContent], {
+                type: "text/csv;charset=utf-8;"
+            });
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = "attendance-report.csv";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            URL.revokeObjectURL(url);
+        }
+
         studentSearch.addEventListener("input", filterStudents);
         attendanceFilter.addEventListener("change", filterStudents);
+        downloadButton.addEventListener("click", downloadCSV);
 
         updateAttendanceSummary();
         calculatePercentages();
