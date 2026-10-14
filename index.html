@@ -21,6 +21,12 @@
             background: #2878c7;
         }
 
+        .report-date {
+            margin-top: 10px;
+            color: #526176;
+            font-size: 14px;
+        }
+
         @media print {
             .no-print, footer {
                 display: none !important;
@@ -44,6 +50,10 @@
             tr[hidden] {
                 display: none !important;
             }
+
+            .report-date {
+                color: black;
+            }
         }
     </style>
 </head>
@@ -57,6 +67,10 @@
 <main>
     <section class="card">
         <h2>Attendance Overview</h2>
+        <p class="report-date">
+            Report Date: <strong id="reportDate">Loading...</strong>
+        </p>
+
         <div class="attendance-summary">
             <div class="summary-card">
                 <h3>Total Students</h3>
@@ -178,6 +192,17 @@
     const tableBody = document.querySelector("#attendanceTable tbody");
     const noResults = document.getElementById("noResults");
 
+    function displayReportDate() {
+        const today = new Date();
+
+        document.getElementById("reportDate").textContent =
+            today.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            });
+    }
+
     function getRows() {
         return Array.from(tableBody.querySelectorAll("tr"));
     }
@@ -235,6 +260,7 @@
                 selectedStatus === "all" || status === selectedStatus;
 
             row.hidden = !(matchesSearch && matchesStatus);
+
             if (!row.hidden) visibleCount++;
         });
 
@@ -253,7 +279,9 @@
             }
 
             if (sortBy === "name") {
-                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
+                return a.cells[1].textContent.localeCompare(
+                    b.cells[1].textContent
+                );
             }
 
             const aPercent = parseFloat(a.cells[3].textContent) || 0;
@@ -273,6 +301,8 @@
 
     function downloadCSV() {
         const data = [
+            ["Report Date", document.getElementById("reportDate").textContent],
+            [],
             ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
         ];
 
@@ -284,7 +314,7 @@
 
         const csv = data.map(function(row) {
             return row.map(function(value) {
-                return '"' + value.replace(/"/g, '""') + '"';
+                return '"' + String(value).replace(/"/g, '""') + '"';
             }).join(",");
         }).join("\r\n");
 
@@ -294,11 +324,14 @@
 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
+
         link.href = url;
         link.download = "attendance-report.csv";
+
         document.body.appendChild(link);
         link.click();
         link.remove();
+
         URL.revokeObjectURL(url);
     }
 
@@ -306,11 +339,15 @@
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
 
-    document.getElementById("downloadReport").addEventListener("click", downloadCSV);
+    document.getElementById("downloadReport").addEventListener(
+        "click", downloadCSV
+    );
+
     document.getElementById("printReport").addEventListener("click", function() {
         window.print();
     });
 
+    displayReportDate();
     calculatePercentages();
     updateAttendanceSummary();
     filterStudents();
