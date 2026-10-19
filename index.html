@@ -32,6 +32,32 @@
             font-weight: bold;
         }
 
+        .attendance-progress {
+            width: 100%;
+            min-width: 100px;
+            height: 12px;
+            margin-top: 6px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #e3e8ef;
+        }
+
+        .attendance-progress-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 20px;
+            background: #218838;
+            transition: width 0.3s ease;
+        }
+
+        .attendance-progress-fill.low {
+            background: #d93025;
+        }
+
+        .percentage-cell {
+            min-width: 130px;
+        }
+
         @media print {
             .no-print, footer {
                 display: none !important;
@@ -58,6 +84,10 @@
 
             .report-date {
                 color: black;
+            }
+
+            .attendance-progress {
+                border: 1px solid #aaa;
             }
         }
     </style>
@@ -155,25 +185,53 @@
                         <td>101</td>
                         <td>Aarav Sharma</td>
                         <td class="status present">Present</td>
-                        <td class="percentage" data-present="45" data-total="50"></td>
+                        <td class="percentage-cell">
+                            <span class="percentage" data-present="45" data-total="50"></span>
+                            <div class="attendance-progress" role="progressbar"
+                                 aria-label="Aarav Sharma attendance"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                <div class="attendance-progress-fill"></div>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td>102</td>
                         <td>Priya Singh</td>
                         <td class="status absent">Absent</td>
-                        <td class="percentage" data-present="38" data-total="50"></td>
+                        <td class="percentage-cell">
+                            <span class="percentage" data-present="38" data-total="50"></span>
+                            <div class="attendance-progress" role="progressbar"
+                                 aria-label="Priya Singh attendance"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                <div class="attendance-progress-fill"></div>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td>103</td>
                         <td>Rahul Verma</td>
                         <td class="status present">Present</td>
-                        <td class="percentage" data-present="48" data-total="50"></td>
+                        <td class="percentage-cell">
+                            <span class="percentage" data-present="48" data-total="50"></span>
+                            <div class="attendance-progress" role="progressbar"
+                                 aria-label="Rahul Verma attendance"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                <div class="attendance-progress-fill"></div>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td>104</td>
                         <td>Neha Joshi</td>
                         <td class="status present">Present</td>
-                        <td class="percentage" data-present="42" data-total="50"></td>
+                        <td class="percentage-cell">
+                            <span class="percentage" data-present="42" data-total="50"></span>
+                            <div class="attendance-progress" role="progressbar"
+                                 aria-label="Neha Joshi attendance"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                <div class="attendance-progress-fill"></div>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -231,9 +289,17 @@
             const present = Number(cell.dataset.present);
             const total = Number(cell.dataset.total);
             const percentage = total > 0 ? present / total * 100 : 0;
+            const safePercentage = Math.max(0, Math.min(100, percentage));
+            const row = cell.closest("tr");
+            const progress = row.querySelector(".attendance-progress");
+            const fill = row.querySelector(".attendance-progress-fill");
 
-            cell.textContent = percentage.toFixed(1) + "%";
-            cell.classList.toggle("low-attendance", percentage < 75);
+            cell.textContent = safePercentage.toFixed(1) + "%";
+            cell.classList.toggle("low-attendance", safePercentage < 75);
+
+            fill.style.width = safePercentage + "%";
+            fill.classList.toggle("low", safePercentage < 75);
+            progress.setAttribute("aria-valuenow", safePercentage.toFixed(1));
         });
     }
 
@@ -245,7 +311,7 @@
 
         rows.forEach(function(row) {
             const status = row.cells[2].textContent.trim().toLowerCase();
-            const percentage = parseFloat(row.cells[3].textContent) || 0;
+            const percentage = parseFloat(row.querySelector(".percentage").textContent) || 0;
 
             if (status === "present") present++;
             if (status === "absent") absent++;
@@ -268,10 +334,8 @@
             const name = row.cells[1].textContent.toLowerCase();
             const status = row.cells[2].textContent.trim().toLowerCase();
 
-            const matchesSearch =
-                roll.includes(searchTerm) || name.includes(searchTerm);
-            const matchesStatus =
-                selectedStatus === "all" || status === selectedStatus;
+            const matchesSearch = roll.includes(searchTerm) || name.includes(searchTerm);
+            const matchesStatus = selectedStatus === "all" || status === selectedStatus;
 
             row.hidden = !(matchesSearch && matchesStatus);
             if (!row.hidden) visibleCount++;
@@ -289,18 +353,15 @@
             const sortBy = sortRecords.value;
 
             if (sortBy === "roll") {
-                return Number(a.cells[0].textContent) -
-                    Number(b.cells[0].textContent);
+                return Number(a.cells[0].textContent) - Number(b.cells[0].textContent);
             }
 
             if (sortBy === "name") {
-                return a.cells[1].textContent.localeCompare(
-                    b.cells[1].textContent
-                );
+                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
             }
 
-            const aPercent = parseFloat(a.cells[3].textContent) || 0;
-            const bPercent = parseFloat(b.cells[3].textContent) || 0;
+            const aPercent = parseFloat(a.querySelector(".percentage").textContent) || 0;
+            const bPercent = parseFloat(b.querySelector(".percentage").textContent) || 0;
 
             return sortBy === "percentageHigh"
                 ? bPercent - aPercent
@@ -329,9 +390,12 @@
         ];
 
         getRows().forEach(function(row) {
-            data.push(Array.from(row.cells).map(function(cell) {
-                return cell.textContent.trim();
-            }));
+            data.push([
+                row.cells[0].textContent.trim(),
+                row.cells[1].textContent.trim(),
+                row.cells[2].textContent.trim(),
+                row.querySelector(".percentage").textContent.trim()
+            ]);
         });
 
         const csv = data.map(function(row) {
@@ -367,11 +431,9 @@
         "click", downloadCSV
     );
 
-    document.getElementById("printReport").addEventListener(
-        "click", function() {
-            window.print();
-        }
-    );
+    document.getElementById("printReport").addEventListener("click", function() {
+        window.print();
+    });
 
     displayReportDate();
     calculatePercentages();
