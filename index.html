@@ -51,6 +51,12 @@
         .legend-absent { color: #a32121; }
         .legend-low { color: #a85a00; }
 
+        .overall-rate {
+            font-size: 26px;
+            font-weight: bold;
+            color: #176b35;
+        }
+
         @media print {
             .no-print, footer {
                 display: none !important;
@@ -91,16 +97,21 @@
                 <p id="totalStudents">0</p>
             </div>
             <div class="summary-card">
-                <h3>Present</h3>
+                <h3>Present Today</h3>
                 <p id="presentStudents">0</p>
             </div>
             <div class="summary-card">
-                <h3>Absent</h3>
+                <h3>Absent Today</h3>
                 <p id="absentStudents">0</p>
             </div>
             <div class="summary-card">
                 <h3>Low Attendance (&lt;75%)</h3>
                 <p id="lowAttendanceCount">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Overall Attendance Rate</h3>
+                <p id="overallAttendanceRate" class="overall-rate">0%</p>
+                <small id="attendanceTotals">0 of 0 classes attended</small>
             </div>
         </div>
     </section>
@@ -260,6 +271,8 @@
         let present = 0;
         let absent = 0;
         let lowAttendance = 0;
+        let totalAttendedClasses = 0;
+        let totalPossibleClasses = 0;
 
         rows.forEach(function(row) {
             const status = row.cells[2].textContent.trim().toLowerCase();
@@ -273,12 +286,28 @@
                 Number.isFinite(percentage) && percentage < 75) {
                 lowAttendance++;
             }
+
+            if (cell.dataset.valid === "true") {
+                totalAttendedClasses += Number(cell.dataset.present);
+                totalPossibleClasses += Number(cell.dataset.total);
+            }
         });
+
+        const overallRate = totalPossibleClasses > 0
+            ? (totalAttendedClasses / totalPossibleClasses) * 100
+            : 0;
 
         document.getElementById("totalStudents").textContent = rows.length;
         document.getElementById("presentStudents").textContent = present;
         document.getElementById("absentStudents").textContent = absent;
         document.getElementById("lowAttendanceCount").textContent = lowAttendance;
+
+        document.getElementById("overallAttendanceRate").textContent =
+            overallRate.toFixed(1) + "%";
+
+        document.getElementById("attendanceTotals").textContent =
+            totalAttendedClasses + " of " + totalPossibleClasses +
+            " classes attended";
     }
 
     function filterStudents() {
@@ -344,6 +373,8 @@
     function downloadCSV() {
         const data = [
             ["Report Date", document.getElementById("reportDate").textContent],
+            ["Overall Attendance Rate",
+             document.getElementById("overallAttendanceRate").textContent],
             [],
             ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
         ];
