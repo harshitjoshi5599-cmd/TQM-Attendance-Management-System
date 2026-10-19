@@ -29,41 +29,7 @@
 
         .results-count {
             margin: 12px 0;
-            color: #526176;
-            font-size: 14px;
-        }
-
-        .status-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin: 12px 0 18px;
-        }
-
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .present-dot { background: #218838; }
-        .absent-dot { background: #dc3545; }
-        .low-dot { background: #e09b18; }
-
-        .clear-button {
-            background: #526176;
-        }
-
-        .clear-button:hover {
-            background: #374151;
+            font-weight: bold;
         }
 
         @media print {
@@ -133,22 +99,10 @@
     <section class="card">
         <h2>Attendance Records</h2>
 
-        <div class="status-legend">
-            <span class="legend-item">
-                <span class="legend-dot present-dot"></span> Present
-            </span>
-            <span class="legend-item">
-                <span class="legend-dot absent-dot"></span> Absent
-            </span>
-            <span class="legend-item">
-                <span class="legend-dot low-dot"></span> Low attendance
-            </span>
-        </div>
-
         <div class="search-container no-print">
             <label for="studentSearch">Search by name or roll number</label>
             <input type="text" id="studentSearch"
-                placeholder="Enter student name or roll number...">
+                   placeholder="Enter student name or roll number...">
         </div>
 
         <div class="search-container no-print">
@@ -172,7 +126,7 @@
 
         <div class="search-container no-print">
             <button type="button" class="action-button" id="clearFilters">
-                Clear Search and Filters
+                Clear Search &amp; Filters
             </button>
             <button type="button" class="action-button" id="downloadReport">
                 Download CSV Report
@@ -229,6 +183,15 @@
     </section>
 
     <section class="card">
+        <h2>Attendance Status Legend</h2>
+        <ul>
+            <li><strong>Present:</strong> Student is marked present.</li>
+            <li><strong>Absent:</strong> Student is marked absent.</li>
+            <li><strong>Low Attendance:</strong> Attendance is below 75%.</li>
+        </ul>
+    </section>
+
+    <section class="card">
         <h2>Project Objectives</h2>
         <ul>
             <li>Maintain student attendance records.</li>
@@ -249,7 +212,6 @@
     const sortRecords = document.getElementById("sortRecords");
     const tableBody = document.querySelector("#attendanceTable tbody");
     const noResults = document.getElementById("noResults");
-    const resultsCount = document.getElementById("resultsCount");
 
     function displayReportDate() {
         document.getElementById("reportDate").textContent =
@@ -316,7 +278,7 @@
         });
 
         noResults.hidden = visibleCount > 0;
-        resultsCount.textContent =
+        document.getElementById("resultsCount").textContent =
             "Showing " + visibleCount + " of " + getRows().length + " students";
     }
 
@@ -352,7 +314,7 @@
         filterStudents();
     }
 
-    function clearFilters() {
+    function clearSearchAndFilters() {
         studentSearch.value = "";
         attendanceFilter.value = "all";
         sortRecords.value = "roll";
@@ -366,9 +328,7 @@
             ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
         ];
 
-        getRows().filter(function(row) {
-            return !row.hidden;
-        }).forEach(function(row) {
+        getRows().forEach(function(row) {
             data.push(Array.from(row.cells).map(function(cell) {
                 return cell.textContent.trim();
             }));
@@ -388,6 +348,7 @@
         const link = document.createElement("a");
         link.href = url;
         link.download = "attendance-report.csv";
+
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -397,11 +358,20 @@
     studentSearch.addEventListener("input", filterStudents);
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
-    document.getElementById("clearFilters").addEventListener("click", clearFilters);
-    document.getElementById("downloadReport").addEventListener("click", downloadCSV);
-    document.getElementById("printReport").addEventListener("click", function() {
-        window.print();
-    });
+
+    document.getElementById("clearFilters").addEventListener(
+        "click", clearSearchAndFilters
+    );
+
+    document.getElementById("downloadReport").addEventListener(
+        "click", downloadCSV
+    );
+
+    document.getElementById("printReport").addEventListener(
+        "click", function() {
+            window.print();
+        }
+    );
 
     displayReportDate();
     calculatePercentages();
