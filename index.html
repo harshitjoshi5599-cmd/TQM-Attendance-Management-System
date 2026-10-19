@@ -28,34 +28,35 @@
         }
 
         .results-count {
+            color: #526176;
+            font-size: 14px;
             margin: 12px 0;
-            font-weight: bold;
         }
 
-        .attendance-progress {
-            width: 100%;
-            min-width: 100px;
-            height: 12px;
-            margin-top: 6px;
-            overflow: hidden;
-            border-radius: 20px;
-            background: #e3e8ef;
+        .attendance-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 12px 0;
         }
 
-        .attendance-progress-fill {
-            height: 100%;
-            width: 0;
-            border-radius: 20px;
-            background: #218838;
-            transition: width 0.3s ease;
+        .legend-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #f0f3f8;
         }
 
-        .attendance-progress-fill.low {
-            background: #d93025;
+        .legend-present {
+            color: #176b35;
         }
 
-        .percentage-cell {
-            min-width: 130px;
+        .legend-absent {
+            color: #a32121;
+        }
+
+        .legend-low {
+            color: #a85a00;
         }
 
         @media print {
@@ -84,10 +85,6 @@
 
             .report-date {
                 color: black;
-            }
-
-            .attendance-progress {
-                border: 1px solid #aaa;
             }
         }
     </style>
@@ -129,10 +126,16 @@
     <section class="card">
         <h2>Attendance Records</h2>
 
+        <div class="attendance-legend">
+            <span class="legend-item legend-present">Present: Attended today</span>
+            <span class="legend-item legend-absent">Absent: Not present today</span>
+            <span class="legend-item legend-low">Low attendance: Below 75%</span>
+        </div>
+
         <div class="search-container no-print">
             <label for="studentSearch">Search by name or roll number</label>
             <input type="text" id="studentSearch"
-                   placeholder="Enter student name or roll number...">
+                placeholder="Enter student name or roll number...">
         </div>
 
         <div class="search-container no-print">
@@ -155,9 +158,6 @@
         </div>
 
         <div class="search-container no-print">
-            <button type="button" class="action-button" id="clearFilters">
-                Clear Search &amp; Filters
-            </button>
             <button type="button" class="action-button" id="downloadReport">
                 Download CSV Report
             </button>
@@ -185,68 +185,31 @@
                         <td>101</td>
                         <td>Aarav Sharma</td>
                         <td class="status present">Present</td>
-                        <td class="percentage-cell">
-                            <span class="percentage" data-present="45" data-total="50"></span>
-                            <div class="attendance-progress" role="progressbar"
-                                 aria-label="Aarav Sharma attendance"
-                                 aria-valuemin="0" aria-valuemax="100">
-                                <div class="attendance-progress-fill"></div>
-                            </div>
-                        </td>
+                        <td class="percentage" data-present="45" data-total="50"></td>
                     </tr>
                     <tr>
                         <td>102</td>
                         <td>Priya Singh</td>
                         <td class="status absent">Absent</td>
-                        <td class="percentage-cell">
-                            <span class="percentage" data-present="38" data-total="50"></span>
-                            <div class="attendance-progress" role="progressbar"
-                                 aria-label="Priya Singh attendance"
-                                 aria-valuemin="0" aria-valuemax="100">
-                                <div class="attendance-progress-fill"></div>
-                            </div>
-                        </td>
+                        <td class="percentage" data-present="38" data-total="50"></td>
                     </tr>
                     <tr>
                         <td>103</td>
                         <td>Rahul Verma</td>
                         <td class="status present">Present</td>
-                        <td class="percentage-cell">
-                            <span class="percentage" data-present="48" data-total="50"></span>
-                            <div class="attendance-progress" role="progressbar"
-                                 aria-label="Rahul Verma attendance"
-                                 aria-valuemin="0" aria-valuemax="100">
-                                <div class="attendance-progress-fill"></div>
-                            </div>
-                        </td>
+                        <td class="percentage" data-present="48" data-total="50"></td>
                     </tr>
                     <tr>
                         <td>104</td>
                         <td>Neha Joshi</td>
                         <td class="status present">Present</td>
-                        <td class="percentage-cell">
-                            <span class="percentage" data-present="42" data-total="50"></span>
-                            <div class="attendance-progress" role="progressbar"
-                                 aria-label="Neha Joshi attendance"
-                                 aria-valuemin="0" aria-valuemax="100">
-                                <div class="attendance-progress-fill"></div>
-                            </div>
-                        </td>
+                        <td class="percentage" data-present="42" data-total="50"></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <p id="noResults" hidden>No matching students found.</p>
-    </section>
-
-    <section class="card">
-        <h2>Attendance Status Legend</h2>
-        <ul>
-            <li><strong>Present:</strong> Student is marked present.</li>
-            <li><strong>Absent:</strong> Student is marked absent.</li>
-            <li><strong>Low Attendance:</strong> Attendance is below 75%.</li>
-        </ul>
     </section>
 
     <section class="card">
@@ -270,6 +233,7 @@
     const sortRecords = document.getElementById("sortRecords");
     const tableBody = document.querySelector("#attendanceTable tbody");
     const noResults = document.getElementById("noResults");
+    const resultsCount = document.getElementById("resultsCount");
 
     function displayReportDate() {
         document.getElementById("reportDate").textContent =
@@ -288,18 +252,30 @@
         document.querySelectorAll(".percentage").forEach(function(cell) {
             const present = Number(cell.dataset.present);
             const total = Number(cell.dataset.total);
-            const percentage = total > 0 ? present / total * 100 : 0;
-            const safePercentage = Math.max(0, Math.min(100, percentage));
-            const row = cell.closest("tr");
-            const progress = row.querySelector(".attendance-progress");
-            const fill = row.querySelector(".attendance-progress-fill");
 
-            cell.textContent = safePercentage.toFixed(1) + "%";
-            cell.classList.toggle("low-attendance", safePercentage < 75);
+            const validData =
+                Number.isFinite(present) &&
+                Number.isFinite(total) &&
+                total > 0 &&
+                present >= 0 &&
+                present <= total;
 
-            fill.style.width = safePercentage + "%";
-            fill.classList.toggle("low", safePercentage < 75);
-            progress.setAttribute("aria-valuenow", safePercentage.toFixed(1));
+            if (!validData) {
+                cell.textContent = "Invalid data";
+                cell.classList.add("low-attendance");
+                cell.dataset.valid = "false";
+                return;
+            }
+
+            const percentage = (present / total) * 100;
+            cell.textContent = percentage.toFixed(1) + "%";
+            cell.dataset.valid = "true";
+
+            if (percentage < 75) {
+                cell.classList.add("low-attendance");
+            } else {
+                cell.classList.remove("low-attendance");
+            }
         });
     }
 
@@ -311,11 +287,16 @@
 
         rows.forEach(function(row) {
             const status = row.cells[2].textContent.trim().toLowerCase();
-            const percentage = parseFloat(row.querySelector(".percentage").textContent) || 0;
+            const percentageCell = row.cells[3];
+            const percentage = parseFloat(percentageCell.textContent);
 
             if (status === "present") present++;
             if (status === "absent") absent++;
-            if (percentage < 75) lowAttendance++;
+
+            if (percentageCell.dataset.valid === "true" &&
+                Number.isFinite(percentage) && percentage < 75) {
+                lowAttendance++;
+            }
         });
 
         document.getElementById("totalStudents").textContent = rows.length;
@@ -327,23 +308,27 @@
     function filterStudents() {
         const searchTerm = studentSearch.value.trim().toLowerCase();
         const selectedStatus = attendanceFilter.value;
+        const rows = getRows();
         let visibleCount = 0;
 
-        getRows().forEach(function(row) {
+        rows.forEach(function(row) {
             const roll = row.cells[0].textContent.toLowerCase();
             const name = row.cells[1].textContent.toLowerCase();
             const status = row.cells[2].textContent.trim().toLowerCase();
 
-            const matchesSearch = roll.includes(searchTerm) || name.includes(searchTerm);
-            const matchesStatus = selectedStatus === "all" || status === selectedStatus;
+            const matchesSearch =
+                roll.includes(searchTerm) || name.includes(searchTerm);
+            const matchesStatus =
+                selectedStatus === "all" || status === selectedStatus;
 
             row.hidden = !(matchesSearch && matchesStatus);
+
             if (!row.hidden) visibleCount++;
         });
 
         noResults.hidden = visibleCount > 0;
-        document.getElementById("resultsCount").textContent =
-            "Showing " + visibleCount + " of " + getRows().length + " students";
+        resultsCount.textContent =
+            "Showing " + visibleCount + " of " + rows.length + " students";
     }
 
     function applySort() {
@@ -353,15 +338,18 @@
             const sortBy = sortRecords.value;
 
             if (sortBy === "roll") {
-                return Number(a.cells[0].textContent) - Number(b.cells[0].textContent);
+                return Number(a.cells[0].textContent) -
+                    Number(b.cells[0].textContent);
             }
 
             if (sortBy === "name") {
-                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
+                return a.cells[1].textContent.localeCompare(
+                    b.cells[1].textContent
+                );
             }
 
-            const aPercent = parseFloat(a.querySelector(".percentage").textContent) || 0;
-            const bPercent = parseFloat(b.querySelector(".percentage").textContent) || 0;
+            const aPercent = parseFloat(a.cells[3].textContent) || 0;
+            const bPercent = parseFloat(b.cells[3].textContent) || 0;
 
             return sortBy === "percentageHigh"
                 ? bPercent - aPercent
@@ -375,13 +363,6 @@
         filterStudents();
     }
 
-    function clearSearchAndFilters() {
-        studentSearch.value = "";
-        attendanceFilter.value = "all";
-        sortRecords.value = "roll";
-        applySort();
-    }
-
     function downloadCSV() {
         const data = [
             ["Report Date", document.getElementById("reportDate").textContent],
@@ -390,12 +371,9 @@
         ];
 
         getRows().forEach(function(row) {
-            data.push([
-                row.cells[0].textContent.trim(),
-                row.cells[1].textContent.trim(),
-                row.cells[2].textContent.trim(),
-                row.querySelector(".percentage").textContent.trim()
-            ]);
+            data.push(Array.from(row.cells).map(function(cell) {
+                return cell.textContent.trim();
+            }));
         });
 
         const csv = data.map(function(row) {
@@ -410,22 +388,19 @@
 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
+
         link.href = url;
         link.download = "attendance-report.csv";
-
         document.body.appendChild(link);
         link.click();
         link.remove();
+
         URL.revokeObjectURL(url);
     }
 
     studentSearch.addEventListener("input", filterStudents);
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
-
-    document.getElementById("clearFilters").addEventListener(
-        "click", clearSearchAndFilters
-    );
 
     document.getElementById("downloadReport").addEventListener(
         "click", downloadCSV
