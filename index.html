@@ -17,21 +17,15 @@
             cursor: pointer;
         }
 
-        .action-button:hover {
-            background: #2878c7;
-        }
+        .action-button:hover { background: #2878c7; }
 
-        .report-date {
-            margin-top: 10px;
+        .report-date, .results-count {
             color: #526176;
             font-size: 14px;
         }
 
-        .results-count {
-            color: #526176;
-            font-size: 14px;
-            margin: 12px 0;
-        }
+        .report-date { margin-top: 10px; }
+        .results-count { margin: 12px 0; }
 
         .attendance-legend {
             display: flex;
@@ -57,24 +51,34 @@
             color: #176b35;
         }
 
+        .grade {
+            display: inline-block;
+            min-width: 28px;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            background: #e8eef8;
+            color: #173b70;
+        }
+
+        .grade-a { background: #d9f4e2; color: #176b35; }
+        .grade-b { background: #e0edff; color: #174b8a; }
+        .grade-c { background: #fff0cc; color: #8a5900; }
+        .grade-d { background: #ffe0e0; color: #a32121; }
+
         @media print {
-            .no-print, footer {
-                display: none !important;
-            }
-
+            .no-print, footer { display: none !important; }
             body { background: white; }
-
             .card {
                 box-shadow: none;
                 border: 1px solid #ddd;
                 break-inside: avoid;
             }
-
             th {
                 background: #eee !important;
                 color: black !important;
             }
-
             tr[hidden] { display: none !important; }
             .report-date { color: black; }
         }
@@ -151,20 +155,12 @@
         </div>
 
         <div class="search-container no-print">
-            <button type="button" class="action-button" id="clearFilters">
-                Clear Search and Filters
-            </button>
-            <button type="button" class="action-button" id="downloadReport">
-                Download CSV Report
-            </button>
-            <button type="button" class="action-button" id="printReport">
-                Print / Save as PDF
-            </button>
+            <button type="button" class="action-button" id="clearFilters">Clear Search and Filters</button>
+            <button type="button" class="action-button" id="downloadReport">Download CSV Report</button>
+            <button type="button" class="action-button" id="printReport">Print / Save as PDF</button>
         </div>
 
-        <p class="results-count" id="resultsCount" aria-live="polite">
-            Showing 0 of 0 students
-        </p>
+        <p class="results-count" id="resultsCount" aria-live="polite">Showing 0 of 0 students</p>
 
         <div class="table-container">
             <table id="attendanceTable">
@@ -174,6 +170,7 @@
                         <th>Student Name</th>
                         <th>Status</th>
                         <th>Attendance Percentage</th>
+                        <th>Performance Grade</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -182,30 +179,35 @@
                         <td>Aarav Sharma</td>
                         <td class="status present">Present</td>
                         <td class="percentage" data-present="45" data-total="50"></td>
+                        <td class="performance-grade"></td>
                     </tr>
                     <tr>
                         <td>102</td>
                         <td>Priya Singh</td>
                         <td class="status absent">Absent</td>
                         <td class="percentage" data-present="38" data-total="50"></td>
+                        <td class="performance-grade"></td>
                     </tr>
                     <tr>
                         <td>103</td>
                         <td>Rahul Verma</td>
                         <td class="status present">Present</td>
                         <td class="percentage" data-present="48" data-total="50"></td>
+                        <td class="performance-grade"></td>
                     </tr>
                     <tr>
                         <td>104</td>
                         <td>Neha Joshi</td>
                         <td class="status present">Present</td>
                         <td class="percentage" data-present="42" data-total="50"></td>
+                        <td class="performance-grade"></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <p id="noResults" hidden>No matching students found.</p>
+        <p><strong>Grade guide:</strong> A = 90% or above, B = 80–89.9%, C = 75–79.9%, D = below 75%.</p>
     </section>
 
     <section class="card">
@@ -249,8 +251,8 @@
             const present = Number(cell.dataset.present);
             const total = Number(cell.dataset.total);
             const valid = Number.isFinite(present) &&
-                Number.isFinite(total) && total > 0 &&
-                present >= 0 && present <= total;
+                Number.isFinite(total) &&
+                total > 0 && present >= 0 && present <= total;
 
             if (!valid) {
                 cell.textContent = "Invalid data";
@@ -266,6 +268,38 @@
         });
     }
 
+    function getGrade(percentage) {
+        if (percentage >= 90) return { letter: "A", className: "grade-a" };
+        if (percentage >= 80) return { letter: "B", className: "grade-b" };
+        if (percentage >= 75) return { letter: "C", className: "grade-c" };
+        return { letter: "D", className: "grade-d" };
+    }
+
+    function updatePerformanceGrades() {
+        getRows().forEach(function(row) {
+            const percentageCell = row.querySelector(".percentage");
+            const gradeCell = row.querySelector(".performance-grade");
+
+            if (percentageCell.dataset.valid !== "true") {
+                gradeCell.textContent = "N/A";
+                gradeCell.className = "performance-grade";
+                return;
+            }
+
+            const percentage = Number(percentageCell.dataset.present) /
+                Number(percentageCell.dataset.total) * 100;
+            const grade = getGrade(percentage);
+
+            gradeCell.innerHTML = "";
+            const badge = document.createElement("span");
+            badge.className = "grade " + grade.className;
+            badge.textContent = grade.letter;
+            badge.title = "Attendance: " + percentage.toFixed(1) + "%";
+            gradeCell.appendChild(badge);
+            gradeCell.className = "performance-grade";
+        });
+    }
+
     function updateAttendanceSummary() {
         const rows = getRows();
         let present = 0;
@@ -276,7 +310,7 @@
 
         rows.forEach(function(row) {
             const status = row.cells[2].textContent.trim().toLowerCase();
-            const cell = row.cells[3];
+            const cell = row.querySelector(".percentage");
             const percentage = parseFloat(cell.textContent);
 
             if (status === "present") present++;
@@ -294,17 +328,15 @@
         });
 
         const overallRate = totalPossibleClasses > 0
-            ? (totalAttendedClasses / totalPossibleClasses) * 100
+            ? totalAttendedClasses / totalPossibleClasses * 100
             : 0;
 
         document.getElementById("totalStudents").textContent = rows.length;
         document.getElementById("presentStudents").textContent = present;
         document.getElementById("absentStudents").textContent = absent;
         document.getElementById("lowAttendanceCount").textContent = lowAttendance;
-
         document.getElementById("overallAttendanceRate").textContent =
             overallRate.toFixed(1) + "%";
-
         document.getElementById("attendanceTotals").textContent =
             totalAttendedClasses + " of " + totalPossibleClasses +
             " classes attended";
@@ -348,8 +380,8 @@
                 return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
             }
 
-            const aValue = parseFloat(a.cells[3].textContent) || 0;
-            const bValue = parseFloat(b.cells[3].textContent) || 0;
+            const aValue = parseFloat(a.querySelector(".percentage").textContent) || 0;
+            const bValue = parseFloat(b.querySelector(".percentage").textContent) || 0;
 
             return option === "percentageHigh"
                 ? bValue - aValue
@@ -376,7 +408,8 @@
             ["Overall Attendance Rate",
              document.getElementById("overallAttendanceRate").textContent],
             [],
-            ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
+            ["Roll Number", "Student Name", "Status",
+             "Attendance Percentage", "Performance Grade"]
         ];
 
         getRows().forEach(function(row) {
@@ -417,6 +450,7 @@
 
     displayReportDate();
     calculatePercentages();
+    updatePerformanceGrades();
     updateAttendanceSummary();
     filterStudents();
 </script>
