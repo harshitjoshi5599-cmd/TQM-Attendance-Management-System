@@ -29,9 +29,44 @@
 
         .results-count {
             margin: 12px 0;
-            font-size: 14px;
             font-weight: 600;
             color: #173b70;
+        }
+
+        .status-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 12px;
+            border-radius: 7px;
+            background: #f2f5f9;
+            font-size: 14px;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .dot-present {
+            background: #218838;
+        }
+
+        .dot-absent {
+            background: #dc3545;
+        }
+
+        .dot-low {
+            background: #e09b18;
         }
 
         @media print {
@@ -58,8 +93,7 @@
                 display: none !important;
             }
 
-            .report-date,
-            .results-count {
+            .report-date {
                 color: black;
             }
         }
@@ -102,6 +136,21 @@
     <section class="card">
         <h2>Attendance Records</h2>
 
+        <div class="status-legend" aria-label="Attendance status legend">
+            <span class="legend-item">
+                <span class="legend-dot dot-present"></span>
+                Present: attended class
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot dot-absent"></span>
+                Absent: missed class
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot dot-low"></span>
+                Low attendance: below 75%
+            </span>
+        </div>
+
         <div class="search-container no-print">
             <label for="studentSearch">Search by name or roll number</label>
             <input type="text" id="studentSearch"
@@ -133,6 +182,9 @@
             </button>
             <button type="button" class="action-button" id="printReport">
                 Print / Save as PDF
+            </button>
+            <button type="button" class="action-button" id="resetFilters">
+                Clear Search &amp; Filters
             </button>
         </div>
 
@@ -206,10 +258,8 @@
     const resultsCount = document.getElementById("resultsCount");
 
     function displayReportDate() {
-        const today = new Date();
-
         document.getElementById("reportDate").textContent =
-            today.toLocaleDateString("en-IN", {
+            new Date().toLocaleDateString("en-IN", {
                 day: "2-digit",
                 month: "long",
                 year: "numeric"
@@ -227,12 +277,7 @@
             const percentage = total > 0 ? (present / total) * 100 : 0;
 
             cell.textContent = percentage.toFixed(1) + "%";
-
-            if (percentage < 75) {
-                cell.classList.add("low-attendance");
-            } else {
-                cell.classList.remove("low-attendance");
-            }
+            cell.classList.toggle("low-attendance", percentage < 75);
         });
     }
 
@@ -260,10 +305,9 @@
     function filterStudents() {
         const searchTerm = studentSearch.value.trim().toLowerCase();
         const selectedStatus = attendanceFilter.value;
-        const rows = getRows();
         let visibleCount = 0;
 
-        rows.forEach(function(row) {
+        getRows().forEach(function(row) {
             const roll = row.cells[0].textContent.toLowerCase();
             const name = row.cells[1].textContent.toLowerCase();
             const status = row.cells[2].textContent.trim().toLowerCase();
@@ -279,8 +323,7 @@
         });
 
         resultsCount.textContent =
-            "Showing " + visibleCount + " of " + rows.length + " students";
-
+            "Showing " + visibleCount + " of " + getRows().length + " students";
         noResults.hidden = visibleCount > 0;
     }
 
@@ -296,9 +339,7 @@
             }
 
             if (sortBy === "name") {
-                return a.cells[1].textContent.localeCompare(
-                    b.cells[1].textContent
-                );
+                return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
             }
 
             const aPercent = parseFloat(a.cells[3].textContent) || 0;
@@ -323,7 +364,9 @@
             ["Roll Number", "Student Name", "Status", "Attendance Percentage"]
         ];
 
-        getRows().forEach(function(row) {
+        getRows().filter(function(row) {
+            return !row.hidden;
+        }).forEach(function(row) {
             data.push(Array.from(row.cells).map(function(cell) {
                 return cell.textContent.trim();
             }));
@@ -341,28 +384,30 @@
 
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-
         link.href = url;
         link.download = "attendance-report.csv";
-
         document.body.appendChild(link);
         link.click();
         link.remove();
-
         URL.revokeObjectURL(url);
+    }
+
+    function resetFilters() {
+        studentSearch.value = "";
+        attendanceFilter.value = "all";
+        sortRecords.value = "roll";
+        applySort();
     }
 
     studentSearch.addEventListener("input", filterStudents);
     attendanceFilter.addEventListener("change", filterStudents);
     sortRecords.addEventListener("change", applySort);
 
-    document.getElementById("downloadReport").addEventListener(
-        "click", downloadCSV
-    );
-
+    document.getElementById("downloadReport").addEventListener("click", downloadCSV);
     document.getElementById("printReport").addEventListener("click", function() {
         window.print();
     });
+    document.getElementById("resetFilters").addEventListener("click", resetFilters);
 
     displayReportDate();
     calculatePercentages();
